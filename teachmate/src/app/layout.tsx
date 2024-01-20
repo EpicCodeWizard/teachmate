@@ -58,7 +58,7 @@ export default async function RootLayout({
                   </li>
                 </ul>
               </div>
-              <a className="btn btn-ghost text-xl">TeachMate</a>
+              <a className="btn btn-ghost text-xl" href="/">TeachMate</a>
             </div>
             <div className="navbar-center hidden lg:flex">
               <ul className="menu menu-horizontal px-1">
@@ -74,7 +74,7 @@ export default async function RootLayout({
               </ul>
             </div>
             <div className="navbar-end">
-              <SignedIn><UserButton></UserButton></SignedIn>
+              <SignedIn><UserButton afterSignOutUrl="/"></UserButton></SignedIn>
               <SignedOut><SignInButton></SignInButton></SignedOut>
             </div>
           </div>
