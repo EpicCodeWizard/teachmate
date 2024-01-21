@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from 'next/script'
-import { SessionProvider } from "next-auth/react"
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -42,14 +41,8 @@ export default async function RootLayout({
                   <a href="/slideshow">Slideshow</a>
                 </li>
                 <li>
-                  <a href="/substitute">Substitute</a>
+                  <a href="/feedback">Feedback</a>
                 </li>
-                {/* <li>
-                  <a href="/">Schedule</a>
-                </li>
-                <li>
-                  <a href="/">Schedule</a>
-                </li> */}
               </ul>
             </div>
             <div className="navbar-end">
@@ -57,7 +50,6 @@ export default async function RootLayout({
               <SignedOut><SignInButton mode="modal"></SignInButton></SignedOut>
             </div>
           </div>
-
           {children}
           <Script src="/script.js" />
         </body>
