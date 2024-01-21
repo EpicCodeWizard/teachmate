@@ -2,6 +2,7 @@ import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from "@c
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Script from 'next/script'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -75,11 +76,12 @@ export default async function RootLayout({
             </div>
             <div className="navbar-end">
               <SignedIn><UserButton afterSignOutUrl="/"></UserButton></SignedIn>
-              <SignedOut><SignInButton></SignInButton></SignedOut>
+              <SignedOut><SignInButton mode="modal"></SignInButton></SignedOut>
             </div>
           </div>
 
           {children}
+          <Script src="/script.js" />
         </body>
       </html>
     </ClerkProvider>
