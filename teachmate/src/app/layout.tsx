@@ -64,6 +64,12 @@ export default async function RootLayout({
             <div className="navbar-center hidden lg:flex">
               <ul className="menu menu-horizontal px-1">
                 <li>
+                  <a href="/attendance">About</a>
+                </li>
+                <li>
+                  <a href="/slides">Slides</a>
+                </li>
+                <li>
                   <a href="/attendance">Attendance</a>
                 </li>
                 <li>
