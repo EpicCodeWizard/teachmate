@@ -21,6 +21,7 @@ const provider = new firebase.auth.GoogleAuthProvider();
 provider.addScope("https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly");
 provider.addScope("https://www.googleapis.com/auth/classroom.announcements.readonly");
 provider.addScope("https://www.googleapis.com/auth/classroom.coursework.students");
+provider.addScope("https://www.googleapis.com/auth/drive.file");
 provider.setCustomParameters({ prompt: "select_account" });
 // Sign in and sign out functins
 const signIn = () => auth.signInWithPopup(provider);

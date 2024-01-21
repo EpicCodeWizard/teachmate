@@ -18,7 +18,6 @@ export default function MyApp() {
                   </div>
                   <input type="file" className="file-input file-input-bordered w-full max-w-xs" />
                 </label>
-                <input type="email" placeholder="email" className="input input-bordered" required />
               </div>
               <div className="form-control">
                 <label className="form-control w-full max-w-xs">
@@ -28,7 +27,6 @@ export default function MyApp() {
                   </div>
                   <input type="file" className="file-input file-input-bordered w-full max-w-xs" />
                 </label>
-                <input type="email" placeholder="email" className="input input-bordered" required />
               </div>
               <div className="form-control mt-6">
                 <button className="btn btn-primary">Submit</button>
