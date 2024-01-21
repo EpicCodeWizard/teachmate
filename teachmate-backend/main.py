@@ -60,7 +60,7 @@ def convert_to_pdf(filename):
     output = cloudconvert.Task.wait(id=job["tasks"][1]["id"])
     return output.get("result").get("files")[0]["filename"], requests.get(output.get("result").get("files")[0]["url"]).content
 
-@app.route("/substitute")
+@app.route("/substitute", methods=["POST"])
 async def substitute():
     file = (await request.files).pop("slideshow") # rest of the files, past the slideshow, will be google classroom documents
     temporary_document = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1])
@@ -102,7 +102,7 @@ async def substitute():
 
     return jsonify(final_slideshow_files)
 
-@app.route("/attendance")
+@app.route("/attendance", methods=["POST"])
 async def attendance():
     seating_chart = fitz.open((await request.files)["attendance"].filename, (await request.files)["attendance"].read())
     text_bbox_dict = {}
@@ -136,7 +136,7 @@ async def attendance():
 
     return jsonify({"present": list(closest_texts.keys()), "absent": list(set(text_bbox_dict.keys()) - set(closest_texts.keys()))})
 
-@app.route("/lesson_plan")
+@app.route("/lesson_plan", methods=["POST"])
 async def lesson_plan():
     file = (await request.files).pop("slideshow")
     temporary_document = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1])
@@ -174,9 +174,9 @@ async def lesson_plan():
 
     return jsonify(final_information)
 
-@app.route("/feedback")
+@app.route("/feedback", methods=["POST"])
 async def feedback():
-    file = (await request.files).pop("slideshow")
+    file = (await request.files).pop("document")
     temporary_document = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1])
     file.save(temporary_document.name)
     temporary_document.close()
@@ -204,7 +204,7 @@ async def feedback():
 
     return jsonify(final_information)
 
-@app.route("/generate_curriculum")
+@app.route("/generate_curriculum", methods=["POST"])
 async def generate_curriculum():
     query = request.args["topic"].strip()
     lesson_time = request.args["lesson_time"].strip()
@@ -221,7 +221,7 @@ async def generate_curriculum():
 
     return jsonify(final_information)
 
-@app.route("/grade")
+@app.route("/grade", methods=["POST"])
 async def grade():
     file = (await request.files).pop("document")
     temporary_document = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1])
@@ -252,7 +252,7 @@ async def grade():
 
     return jsonify(final_information)
 
-@app.route("/download/<filename>")
+@app.route("/download/<filename>", methods=["GET"])
 def download_file(filename):
     return send_file(audio_files[filename], attachment_filename=filename, as_attachment=True, mimetype="audio/mp3")
 
