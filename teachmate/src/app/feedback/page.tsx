@@ -65,7 +65,7 @@ export default function MyApp() {
           </div>
           <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
             <form className="card-body" onSubmit={(event) => {
-              event.preventDefault()
+              event.preventDefault();
             }}>
               <label className="form-control w-full max-w-xs">
                 <div className="label">

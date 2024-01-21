@@ -48,7 +48,9 @@ export default function MyApp() {
             <p className="py-6">TODO write description.</p>
           </div>
           <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
-            <form className="card-body">
+            <form className="card-body"  onSubmit={(event) => {
+              event.preventDefault();
+            }}>
               <div className="form-control mt-6">
                 <button className="btn btn-primary" onClick={() => {signOut();signIn();}}>Sign in with Google Classroom</button>
               </div>

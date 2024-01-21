@@ -36,14 +36,20 @@ export default async function RootLayout({
                   <a href="/attendance">Attendance</a>
                 </li>
                 <li>
-                  <a href="/slides">Generate</a>
+                  <a href="/feedback">Feedback</a>
                 </li>
                 <li>
+                  <a href="/slideshow">Slideshow</a>
+                </li>
+                <li>
+                  <a href="/substitute">Substitute</a>
+                </li>
+                {/* <li>
                   <a href="/">Schedule</a>
                 </li>
                 <li>
                   <a href="/">Schedule</a>
-                </li>
+                </li> */}
               </ul>
             </div>
             <div className="navbar-end">
