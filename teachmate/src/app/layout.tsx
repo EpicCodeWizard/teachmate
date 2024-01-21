@@ -39,10 +39,7 @@ export default async function RootLayout({
                   <a href="/slides">Generate</a>
                 </li>
                 <li>
-                  <a href="/">Schedule</a>
-                </li>
-                <li>
-                  <a href="/">Schedule</a>
+                  <a href="/feedback">Feedback</a>
                 </li>
               </ul>
             </div>
@@ -51,7 +48,6 @@ export default async function RootLayout({
               <SignedOut><SignInButton mode="modal"></SignInButton></SignedOut>
             </div>
           </div>
-
           {children}
           <Script src="/script.js" />
         </body>
