@@ -1,36 +1,23 @@
 export default function MyApp() {
   return (
     <>
-
       <div className="hero min-h-screen bg-base-200">
         <div className="hero-content flex-col lg:flex-row-reverse">
           <div className="text-center lg:text-left">
-            <h1 className="text-5xl font-bold">Login now!</h1>
-            <p className="py-6">Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda excepturi exercitationem quasi. In deleniti eaque aut repudiandae et a id nisi.</p>
+            <h1 className="text-5xl font-bold">Expand on feedback</h1>
+            <p className="py-6">Once you provide a couple sentences of feedback, this app will elaborate on it and create more helpful feedback that is suited for the student.</p>
           </div>
           <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
             <form className="card-body">
-              <div className="form-control">
-                <label className="form-control w-full max-w-xs">
-                  <div className="label">
-                    <span className="label-text">Upload a picture of a seating chart</span>
-                    <span className="label-text-alt">.pdf</span>
-                  </div>
-                  <input type="file" className="file-input file-input-bordered w-full max-w-xs" />
-                </label>
-                <input type="email" placeholder="email" className="input input-bordered" required />
-              </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Password</span>
-                </label>
-                <input type="password" placeholder="password" className="input input-bordered" required />
-                <label className="label">
-                  <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
-                </label>
-              </div>
+              <label className="form-control">
+                <div className="label">
+                  <span className="label-text">Upload your teacher's feedback</span>
+                  <span className="label-text-alt">(1-2) sentences recommended</span>
+                </div>
+                <textarea className="textarea textarea-bordered h-24" placeholder="Bio"></textarea>
+              </label>
               <div className="form-control mt-6">
-                <button className="btn btn-primary">Login</button>
+                <button className="btn btn-primary">Elaborte</button>
               </div>
             </form>
           </div>
