@@ -114,7 +114,7 @@ async def attendance():
                     text_bbox_dict[span["text"].strip()] = list(span["bbox"])
 
     new_bboxes = []
-    rgb_attendance_photo = cv2.cvtColor(cv2.imread((await request.files)["attendance"]), cv2.COLOR_BGR2RGB)
+    rgb_attendance_photo = cv2.cvtColor(cv2.imread((await request.files)["photo"]), cv2.COLOR_BGR2RGB)
     for face in detector.detect_faces(rgb_attendance_photo):
         bbox = face["box"]
         bbox[2] += bbox[0]
@@ -208,6 +208,9 @@ async def feedback():
 async def generate_curriculum():
     query = request.args["topic"].strip()
     lesson_time = request.args["lesson_time"].strip()
+
+    if request.args["user_id"] not in list_corpus():
+        create_corpus(request.args["user_id"])
 
     final_information = {}
     relevant_page_text = query_corpus(request.args["user_id"], query)
