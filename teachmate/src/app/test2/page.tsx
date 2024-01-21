@@ -25,40 +25,15 @@ provider.setCustomParameters({ prompt: "select_account" });
 // Sign in and sign out functins
 const signIn = () => auth.signInWithPopup(provider);
 const signOut = () => auth.signOut();
-
-
-export default function MyApp() {
+function MyApp() {
   const [user, setUser] = useState(null);
   useEffect(() => {
     firebase.auth().onAuthStateChanged(async (user) => {
       console.log(user);
     });
   }, []);
-  // return <>
-  //   <button onClick={() => {signOut();signIn();}}>d</button>
-  // </>
-
-  return (
-    <>
-      <div className="hero min-h-screen bg-base-200">
-        <div className="hero-content flex-col lg:flex-row-reverse">
-          <div className="text-center lg:text-left">
-            <h1 className="text-5xl font-bold">AI Substitute Teacher</h1>
-            <p className="py-6">TODO write description.</p>
-          </div>
-          <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
-            <form className="card-body">
-              <div className="form-control mt-6">
-                <button className="btn btn-primary" onClick={() => {signOut();signIn();}}>Sign in with Google Classroom</button>
-              </div>
-              <div className="form-control mt-6">
-                <button className="btn btn-primary">Elaborate</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-
-    </>
-  );
+  return <>
+    <button onClick={() => {signOut();signIn();}}>d</button>
+  </>
 }
+export default MyApp;

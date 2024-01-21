@@ -17,7 +17,7 @@ export default function MyApp() {
                 <textarea className="textarea textarea-bordered h-24" placeholder="Bio"></textarea>
               </label>
               <div className="form-control mt-6">
-                <button className="btn btn-primary">Elaborte</button>
+                <button className="btn btn-primary">Elaborate</button>
               </div>
             </form>
           </div>
