@@ -5,8 +5,8 @@ export default async function About() {
             <div className="hero-overlay bg-opacity-60"></div>
             <div className="hero-content text-center text-neutral-content">
                 <div className="max-w-md">
-                <h1 className="mb-5 text-5xl font-bold">ABOUT ECOFRIDGE</h1>
-                <h3 className="mb-5">Our app provides a modern experience for reducing food waste. Built by Sarvesh Madullapalli, Kosei Tsukamoto, and Vedant Garg.</h3>
+                <h1 className="mb-5 text-5xl font-bold">ABOUT TEACHMATE</h1>
+                <h3 className="mb-5">An app to give assistance to teachers through generative AI. Built by Sarvesh Madullapalli, Kosei Tsukamoto, and Vedant Garg.</h3>
                 </div>
             </div>
             </div>
