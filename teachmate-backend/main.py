@@ -92,7 +92,7 @@ async def substitute():
 
         relevant_page_text_combined = "\n".join(relevant_page_text)
         prompt = f"Page Text:\n{page_text}\n\n\n\nRelevant Assignment Documents (from google classroom):\n{relevant_page_text_combined}"
-        system_message = "You are a slideshow speaker text creator. Based on the following slide text and slide image, generate a spoken lesson plan. Whatever you generate will be directly spoke to students. You will be given the slide page text, slide page image, and relevant other assigned documents from google classroom."
+        system_message = "You are a slideshow speaker text creator. Based on the following slide text and slide image, generate a spoken lesson plan. Whatever you generate will be directly spoke to students. Hence, don't add anything at the beginning like 'here is the plan:' or anything similar. You will be given the slide page text, slide page image, and relevant other assigned documents from google classroom."
         response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4-vision-preview", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": page_image_url}}]}], "max_tokens": 1500})
 
         audio = openai_client.audio.speech.create(model="tts-1", voice="echo", input=response.json().choices[0]).content
@@ -160,15 +160,15 @@ async def lesson_plan():
     relevant_page_text = query_corpus(request.args["user_id"], document_text_combined)
     prompt = f"Slide Text:\n{document_text_combined}\n\n\n\nOther Relevant Documents:{relevant_page_text}"
 
-    system_message = "You are a slideshow learning objectives creator. Based on the following slide text and other relevant documents, generate 7-8 specific learning objectives. Whatever you generate will be directly given to students."
+    system_message = "You are a slideshow learning objectives creator. Based on the following slide text and other relevant documents, generate 7-8 specific learning objectives. Whatever you generate will be directly given to students. Hence, don't add anything at the beginning like 'here is the plan:' or anything similar. "
     response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, ]}], "max_tokens": 1500})
     final_information["learning_objectives"] = response.json().choices[0]
 
-    system_message = "You are a slideshow starter creator. Based on the following slide text and other relevant documents, generate 2-3 specific questions that can lead to the slideshow. These will be discussion questions - whatever you generate will be directly said to students."
+    system_message = "You are a slideshow starter creator. Based on the following slide text and other relevant documents, generate 2-3 specific questions that can lead to the slideshow. These will be discussion questions - whatever you generate will be directly said to students. Hence, don't add anything at the beginning like 'here is the plan:' or anything similar. "
     response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, ]}], "max_tokens": 1500})
     final_information["initial_questions"] = response.json().choices[0]
 
-    system_message = "You are a slideshow questions creator. Based on the following slide text and other relevant documents, generate 9-10 specific questions that can be asked throughout the slides for comprehension. Whatever you generate will be directly placed into the slides."
+    system_message = "You are a slideshow questions creator. Based on the following slide text and other relevant documents, generate 9-10 specific questions that can be asked throughout the slides for comprehension. Whatever you generate will be directly placed into the slides. Hence, don't add anything at the beginning like 'here is the plan:' or anything similar. "
     response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, ]}], "max_tokens": 1500})
     final_information["questions"] = response.json().choices[0]
 
@@ -198,7 +198,7 @@ async def feedback():
     relevant_page_text = query_corpus(request.args["user_id"], document_text_combined)
     feedback = request.args["feedback"].strip()
     prompt = f"Initial Feedback:\n{feedback}\n\n\n\nDocument Text:\n{document_text_combined}\n\n\n\nOther Relevant Documents:{relevant_page_text}"
-    system_message = "You are a feedback bot. Based on the following document text and other relevant documents, generate specific feedback. It should be highly specific and provide a lot of constructive criticism. It should also reference parts of the document/essay specifically. Whatever you generate will be directly given to students. Some initial feedback has been given as a starting point."
+    system_message = "You are a feedback bot. Based on the following document text and other relevant documents, generate specific feedback. It should be highly specific and provide a lot of constructive criticism. It should also reference parts of the document/essay specifically. Whatever you generate will be directly given to students. Some initial feedback has been given as a starting point. Hence, don't add anything at the beginning like 'here is the plan:' or anything similar. "
     response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, ]}], "max_tokens": 1500})
     final_information["feedback"] = response.json().choices[0]
 
@@ -212,7 +212,7 @@ async def generate_curriculum():
     final_information = {}
     relevant_page_text = query_corpus(request.args["user_id"], query)
     prompt = f"Topic:\n{query}\n\n\n\nOther Relevant Documents:{relevant_page_text}"
-    system_message = f"You are a lesson generator bot. Based on college learning objectives and guidelines, you are to generate a detailed {lesson_time} minute lesson plan. Whatever you generate will be directly used as teaching material for teachers."
+    system_message = f"You are a lesson generator bot. Based on college learning objectives and guidelines, you are to generate a detailed {lesson_time} minute lesson plan. Whatever you generate will be directly used as teaching material for teachers. Hence, don't add anything at the beginning like 'here is the plan:' or anything similar. "
     response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}]}], "max_tokens": 1500})
     final_information["curriculum"] = response.json().choices[0]
 
@@ -241,7 +241,7 @@ async def grade():
     document_text_combined = "\n".join(document_text)
     relevant_page_text = query_corpus(request.args["user_id"], document_text_combined)
     prompt = f"Document Text:\n{document_text_combined}\n\n\n\nOther Relevant Documents:{relevant_page_text}"
-    system_message = "You are a grader bot. Based on the following document text and other relevant documents, generate a grade with general feedback. It should be specific to the assignment at hand and use context from other relevant documents. Whatever you generate will be directly given to students. The first line of your response should be a letter grade with a percent. Then, the rest lines of your response should contain feedback"
+    system_message = "You are a grader bot. Based on the following document text and other relevant documents, generate a grade with general feedback. It should be specific to the assignment at hand and use context from other relevant documents. Whatever you generate will be directly given to students. Hence, don't add anything at the beginning like 'here is the plan:' or anything similar. The first line of your response should be a letter grade with a percent. Then, the rest lines of your response should contain feedback"
     response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, ]}], "max_tokens": 1500})
     grade, feedback = response.json().choices[0].split("\n")[0], "\n".join(response.json().choices[0].split("\n")[1:])
     final_information["grade"] = grade
