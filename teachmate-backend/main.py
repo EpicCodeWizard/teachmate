@@ -43,13 +43,7 @@ def query_corpus(corpus_id, text):
         relevant_text.append(fragment["text"])
     return relevant_text
 
-@app.route("/substitute")
-async def substitute():
-    file = (await request.files).pop("slideshow") # rest of the files, past the slideshow, will be google classroom documents
-    temporary_document = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1])
-    file.save(temporary_document.name)
-    temporary_document.close()
-
+def convert_to_pdf(filename):
     job = cloudconvert.Job.create(payload={
         "tasks": {
             "upload-my-file": {
@@ -62,11 +56,19 @@ async def substitute():
             }
         }
     })
-    cloudconvert.Task.upload(file_name=temporary_document.name, task=cloudconvert.Task.find(id=job["tasks"][0]["id"]))
+    cloudconvert.Task.upload(file_name=filename, task=cloudconvert.Task.find(id=job["tasks"][0]["id"]))
     output = cloudconvert.Task.wait(id=job["tasks"][1]["id"])
-    pdf_file = requests.get(output.get("result").get("files")[0]["url"]).content
+    return output.get("result").get("files")[0]["filename"], requests.get(output.get("result").get("files")[0]["url"]).content
 
-    document = fitz.open(output.get("result").get("files")[0]["filename"], pdf_file)
+@app.route("/substitute")
+async def substitute():
+    file = (await request.files).pop("slideshow") # rest of the files, past the slideshow, will be google classroom documents
+    temporary_document = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1])
+    file.save(temporary_document.name)
+    temporary_document.close()
+
+    pdf_filename, pdf_file = convert_to_pdf(temporary_document.name)
+    document = fitz.open(pdf_filename, pdf_file)
     document_text = []
     document_images = []
     for page in document:
@@ -141,23 +143,8 @@ async def lesson_plan():
     file.save(temporary_document.name)
     temporary_document.close()
 
-    job = cloudconvert.Job.create(payload={
-        "tasks": {
-            "upload-my-file": {
-                "operation": "import/upload"
-            },
-            "convert-my-file": {
-                "operation": "convert",
-                "input": "upload-my-file",
-                "output_format": "pdf"
-            }
-        }
-    })
-    cloudconvert.Task.upload(file_name=temporary_document.name, task=cloudconvert.Task.find(id=job["tasks"][0]["id"]))
-    output = cloudconvert.Task.wait(id=job["tasks"][1]["id"])
-    pdf_file = requests.get(output.get("result").get("files")[0]["url"]).content
-
-    document = fitz.open(output.get("result").get("files")[0]["filename"], pdf_file)
+    pdf_filename, pdf_file = convert_to_pdf(temporary_document.name)
+    document = fitz.open(pdf_filename, pdf_file)
     document_text = []
     document_images = []
     for page in document:
@@ -184,6 +171,81 @@ async def lesson_plan():
     system_message = "You are a slideshow questions creator. Based on the following slide text and other relevant documents, generate 9-10 specific questions that can be asked throughout the slides for comprehension. Whatever you generate will be directly placed into the slides."
     response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, ]}], "max_tokens": 1500})
     final_information["questions"] = response.json().choices[0]
+
+    return jsonify(final_information)
+
+@app.route("/feedback")
+async def feedback():
+    file = (await request.files).pop("slideshow")
+    temporary_document = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1])
+    file.save(temporary_document.name)
+    temporary_document.close()
+
+    pdf_filename, pdf_file = convert_to_pdf(temporary_document.name)
+    document = fitz.open(pdf_filename, pdf_file)
+    document_text = []
+    document_images = []
+    for page in document:
+        page = Image.open(page.get_pixmap()) # allows text from images to also be extracted
+        document_images.append(page)
+        document_text.append(pytesseract.image_to_string(page).strip())
+
+    if request.args["user_id"] not in list_corpus():
+        create_corpus(request.args["user_id"])
+
+    final_information = {}
+    document_text_combined = "\n".join(document_text)
+    relevant_page_text = query_corpus(request.args["user_id"], document_text_combined)
+    feedback = request.args["feedback"].strip()
+    prompt = f"Initial Feedback:\n{feedback}\n\n\n\nDocument Text:\n{document_text_combined}\n\n\n\nOther Relevant Documents:{relevant_page_text}"
+    system_message = "You are a feedback bot. Based on the following document text and other relevant documents, generate specific feedback. It should be highly specific and provide a lot of constructive criticism. It should also reference parts of the document/essay specifically. Whatever you generate will be directly given to students. Some initial feedback has been given as a starting point."
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, ]}], "max_tokens": 1500})
+    final_information["feedback"] = response.json().choices[0]
+
+    return jsonify(final_information)
+
+@app.route("/generate_curriculum")
+async def generate_curriculum():
+    query = request.args["topic"].strip()
+    lesson_time = request.args["lesson_time"].strip()
+
+    final_information = {}
+    relevant_page_text = query_corpus(request.args["user_id"], query)
+    prompt = f"Topic:\n{query}\n\n\n\nOther Relevant Documents:{relevant_page_text}"
+    system_message = f"You are a lesson generator bot. Based on college learning objectives and guidelines, you are to generate a detailed {lesson_time} minute lesson plan. Whatever you generate will be directly used as teaching material for teachers."
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}]}], "max_tokens": 1500})
+    final_information["curriculum"] = response.json().choices[0]
+
+    return jsonify(final_information)
+
+@app.route("/grade")
+async def grade():
+    file = (await request.files).pop("document")
+    temporary_document = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1])
+    file.save(temporary_document.name)
+    temporary_document.close()
+
+    pdf_filename, pdf_file = convert_to_pdf(temporary_document.name)
+    document = fitz.open(pdf_filename, pdf_file)
+    document_text = []
+    document_images = []
+    for page in document:
+        page = Image.open(page.get_pixmap()) # allows text from images to also be extracted
+        document_images.append(page)
+        document_text.append(pytesseract.image_to_string(page).strip())
+
+    if request.args["user_id"] not in list_corpus():
+        create_corpus(request.args["user_id"])
+
+    final_information = {}
+    document_text_combined = "\n".join(document_text)
+    relevant_page_text = query_corpus(request.args["user_id"], document_text_combined)
+    prompt = f"Document Text:\n{document_text_combined}\n\n\n\nOther Relevant Documents:{relevant_page_text}"
+    system_message = "You are a grader bot. Based on the following document text and other relevant documents, generate a grade with general feedback. It should be specific to the assignment at hand and use context from other relevant documents. Whatever you generate will be directly given to students. The first line of your response should be a letter grade with a percent. Then, the rest lines of your response should contain feedback"
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, ]}], "max_tokens": 1500})
+    grade, feedback = response.json().choices[0].split("\n")[0], "\n".join(response.json().choices[0].split("\n")[1:])
+    final_information["grade"] = grade
+    final_information["feedback"] = feedback
 
     return jsonify(final_information)
 
