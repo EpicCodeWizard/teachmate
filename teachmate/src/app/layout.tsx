@@ -40,6 +40,10 @@ export default async function RootLayout({
                 <li>
                   <a href="/slideshow">Slideshow</a>
                 </li>
+                <li>
+                  <a href="/substitute">Substitute</a>
+                </li>
+              </ul>
             </div>
             <div className="navbar-end">
               <SignedIn><UserButton afterSignOutUrl="/"></UserButton></SignedIn>
