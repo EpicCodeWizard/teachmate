@@ -45,7 +45,7 @@ def query_corpus(corpus_id, text):
 
 @app.route("/substitute")
 async def substitute():
-    file = (await request.files).pop("slideshow", None) # rest of the files, past the slideshow, will be google classroom documents
+    file = (await request.files).pop("slideshow") # rest of the files, past the slideshow, will be google classroom documents
     temporary_document = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1])
     file.save(temporary_document.name)
     temporary_document.close()
@@ -89,7 +89,7 @@ async def substitute():
         page_image_url = f"data:image/jpeg;base64,{base64.b64encode(image_buffer.read()).decode()}"
 
         relevant_page_text_combined = "\n".join(relevant_page_text)
-        prompt = f"Page Text:\n{page_text}\nRelevant Assignment Documents (from google classroom):\n{relevant_page_text_combined}"
+        prompt = f"Page Text:\n{page_text}\n\n\n\nRelevant Assignment Documents (from google classroom):\n{relevant_page_text_combined}"
         system_message = "You are a slideshow speaker text creator. Based on the following slide text and slide image, generate a spoken lesson plan. Whatever you generate will be directly spoke to students. You will be given the slide page text, slide page image, and relevant other assigned documents from google classroom."
         response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4-vision-preview", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": page_image_url}}]}], "max_tokens": 1500})
 
@@ -133,6 +133,59 @@ async def attendance():
         closest_texts[closest_text] = new_bbox
 
     return jsonify({"present": list(closest_texts.keys()), "absent": list(set(text_bbox_dict.keys()) - set(closest_texts.keys()))})
+
+@app.route("/lesson_plan")
+async def lesson_plan():
+    file = (await request.files).pop("slideshow")
+    temporary_document = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1])
+    file.save(temporary_document.name)
+    temporary_document.close()
+
+    job = cloudconvert.Job.create(payload={
+        "tasks": {
+            "upload-my-file": {
+                "operation": "import/upload"
+            },
+            "convert-my-file": {
+                "operation": "convert",
+                "input": "upload-my-file",
+                "output_format": "pdf"
+            }
+        }
+    })
+    cloudconvert.Task.upload(file_name=temporary_document.name, task=cloudconvert.Task.find(id=job["tasks"][0]["id"]))
+    output = cloudconvert.Task.wait(id=job["tasks"][1]["id"])
+    pdf_file = requests.get(output.get("result").get("files")[0]["url"]).content
+
+    document = fitz.open(output.get("result").get("files")[0]["filename"], pdf_file)
+    document_text = []
+    document_images = []
+    for page in document:
+        page = Image.open(page.get_pixmap()) # allows text from images to also be extracted
+        document_images.append(page)
+        document_text.append(pytesseract.image_to_string(page).strip())
+
+    if request.args["user_id"] not in list_corpus():
+        create_corpus(request.args["user_id"])
+
+    final_information = {}
+    document_text_combined = "\n".join(document_text)
+    relevant_page_text = query_corpus(request.args["user_id"], document_text_combined)
+    prompt = f"Slide Text:\n{document_text_combined}\n\n\n\nOther Relevant Documents:{relevant_page_text}"
+
+    system_message = "You are a slideshow learning objectives creator. Based on the following slide text and other relevant documents, generate 7-8 specific learning objectives. Whatever you generate will be directly given to students."
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, ]}], "max_tokens": 1500})
+    final_information["learning_objectives"] = response.json().choices[0]
+
+    system_message = "You are a slideshow starter creator. Based on the following slide text and other relevant documents, generate 2-3 specific questions that can lead to the slideshow. These will be discussion questions - whatever you generate will be directly said to students."
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, ]}], "max_tokens": 1500})
+    final_information["initial_questions"] = response.json().choices[0]
+
+    system_message = "You are a slideshow questions creator. Based on the following slide text and other relevant documents, generate 9-10 specific questions that can be asked throughout the slides for comprehension. Whatever you generate will be directly placed into the slides."
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, ]}], "max_tokens": 1500})
+    final_information["questions"] = response.json().choices[0]
+
+    return jsonify(final_information)
 
 @app.route("/download/<filename>")
 def download_file(filename):
