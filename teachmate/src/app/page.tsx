@@ -24,10 +24,10 @@ export default function MyApp() {
         <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-              TeachMate: TODO
+              TeachMate
             </h1>
             <p className="mt-6 text-lg leading-8 text-gray-600">
-              TeachMate is a very easy-to-use application that allows users to scan their fridge for leftovers and find a use for otherwise wasted food. TODO TODO
+              TeachMate is a very easy-to-use application that allows teachers to easily get assistance from fine-tuned generative AI and custom-trained LLM models.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
             <SignInButton mode="modal">
