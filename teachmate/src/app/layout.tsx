@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Script from 'next/script'
+import Link from 'next/link'
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,19 +31,28 @@ export default async function RootLayout({
             <div className="navbar-center hidden lg:flex">
               <ul className="menu menu-horizontal px-1">
                 <li>
-                  <a href="/about">About</a>
+                  <Link href="/about">About</Link>
                 </li>
                 <li>
-                  <a href="/attendance">Attendance</a>
+                  <Link href="/attendance">Attendance</Link>
                 </li>
                 <li>
-                  <a href="/feedback">Feedback</a>
+                  <Link href="/curriculum">Curriculum</Link>
                 </li>
                 <li>
-                  <a href="/slideshow">Slideshow</a>
+                  <Link href="/feedback">Feedback</Link>
                 </li>
                 <li>
-                  <a href="/substitute">Substitute</a>
+                  <Link href="/grading">Grading</Link>
+                </li>
+                <li>
+                  <Link href="/lessonplan">Lesson plan</Link>
+                </li>
+                {/* <li>
+                  <Link href="/slideshow">Slideshow</Link>
+                </li> */}
+                <li>
+                  <Link href="/substitute">Substitute</Link>
                 </li>
               </ul>
             </div>

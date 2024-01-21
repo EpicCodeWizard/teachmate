@@ -1,5 +1,6 @@
-import { SignInButton } from "@clerk/nextjs";
+import { SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import Link from 'next/link';
+import Button from 'next'
 
 export default function MyApp() {
   return (
@@ -24,16 +25,27 @@ export default function MyApp() {
                 TeachMate
               </h1>
               <p className="mt-6 text-lg leading-8 text-gray-600">
-                TeachMate is a very easy-to-use application that allows teachers to easily get assistance from fine-tuned generative AI and custom-trained LLM models.
+                TeachMate is a very easy-to-use application that allows teachers to easily get assistance from fine-tuned generative AI and custom-trained ML models.
               </p>
               <div className="mt-10 flex items-center justify-center gap-x-6">
-                <SignInButton mode="modal">
-                  <a
-                    className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                  >
-                    Get started
-                  </a>
-                </SignInButton>
+                <SignedOut>
+                  <SignInButton mode="modal" afterSignInUrl="/attendance">
+                    <a
+                      className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    >
+                      Get started
+                    </a>
+                  </SignInButton>
+                </SignedOut>
+                <SignedIn>
+                    <a
+                      className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                      // href="/attendance"
+                      href="/substitute"
+                    >
+                      Get started
+                    </a>
+                </SignedIn>
                 <Link href="/about">
                   <span className="text-sm font-semibold leading-6 text-gray-900 cursor-pointer">
                     Learn more <span aria-hidden="true">→</span>

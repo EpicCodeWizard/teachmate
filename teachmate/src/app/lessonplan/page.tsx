@@ -43,6 +43,7 @@ export default function MyApp() {
   // return <>
   //   <button onClick={() => {signOut();signIn();}}>d</button>
   // </>
+
   const [plan, setPlan] = useState({__html: '<p className="py-4" id="out">Loading...</p>'});
 
 
@@ -54,15 +55,15 @@ export default function MyApp() {
           {/* if there is a button in form, it will close the modal */}
           <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
-        <h3 className="font-bold text-lg">Feedback:</h3>
+        <h3 className="font-bold text-lg">Lesson plan:</h3>
         <div dangerouslySetInnerHTML={plan}></div>
       </div>
     </dialog>
       <div className="hero min-h-screen bg-base-200">
         <div className="hero-content flex-col lg:flex-row-reverse">
           <div className="text-center lg:text-left">
-            <h1 className="text-5xl font-bold">Expand on feedback</h1>
-            <p className="py-6">Once you provide a couple sentences of feedback, this app will elaborate on it and create more helpful feedback that is suited for the student.</p>
+            <h1 className="text-5xl font-bold">Generate a lesson plan</h1>
+            <p className="py-6">This app will generate a lesson plan when provided a slideshow.</p>
           </div>
           <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
             <form className="card-body" onSubmit={(event) => {
@@ -70,21 +71,14 @@ export default function MyApp() {
             }}>
               <label className="form-control w-full max-w-xs">
                 <div className="label">
-                  <span className="label-text">Pick your student's work</span>
-                  <span className="label-text-alt">.pdf</span>
+                  <span className="label-text">Pick your slideshow</span>
+                  <span className="label-text-alt">.pdf, .pptx</span>
                 </div>
-                <input type="file" id="fi" className="file-input file-input-bordered w-full max-w-xs" />
+                <input type="file" className="file-input file-input-bordered w-full max-w-xs" accept=".pdf,.pptx" id="fi" />
                 {/* <div className="label">
                   <span className="label-text-alt">Alt label</span>
                   <span className="label-text-alt">Alt label</span>
                 </div> */}
-              </label>
-              <label className="form-control">
-                <div className="label">
-                  <span className="label-text">Upload your feedback</span>
-                  <span className="label-text-alt">(1-2) sentences recommended</span>
-                </div>
-                <textarea id="f"className="textarea textarea-bordered h-24" placeholder="Feedback"></textarea>
               </label>
               <div className="form-control mt-6">
                 <button id="fb"className="btn" onClick={
@@ -92,16 +86,15 @@ export default function MyApp() {
                     document.getElementById('my_modal_3').showModal();
 
                     const formData = new FormData();
-                    formData.append('document', document.getElementById('fi').files[0]);
-                    setPlan({__html: fetch('/feedback?user_id=' + encodeURIComponent(user_id) + '&feedback=' + encodeURIComponent(feedback), {
+                    formData.append('slideshow', document.getElementById('fi').files[0]);
+                    
+                    setPlan({__html: fetch('/lesson_plan?user_id=' + encodeURIComponent(user_id), {
                       method: 'POST',
                       body: formData
                   }).json()})
                     
-
-                    
                   }
-                }>Elaborate</button>
+                }>Generate</button>
               </div>
             </form>
           </div>

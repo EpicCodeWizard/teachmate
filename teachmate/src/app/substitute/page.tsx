@@ -4,6 +4,7 @@
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import { useEffect, useState } from "react";
+import Link from "next/link"
 // Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDPa95pNxL201wnZuY72YJPrG2nxMBVSn4",
@@ -33,6 +34,9 @@ export default function MyApp() {
   useEffect(() => {
     firebase.auth().onAuthStateChanged(async (user) => {
       console.log(user);
+      if (user != null) {
+        document.getElementById('my_modal_3').showModal();
+      }
     });
   }, []);
   // return <>
@@ -41,26 +45,29 @@ export default function MyApp() {
 
   return (
     <>
-      <div className="hero min-h-screen bg-base-200">
-        <div className="hero-content flex-col lg:flex-row-reverse">
-          <div className="text-center lg:text-left">
-            <h1 className="text-5xl font-bold">AI Substitute Teacher</h1>
-            <p className="py-6">TODO write description.</p>
-          </div>
-          <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
-            <form className="card-body"  onSubmit={(event) => {
-              event.preventDefault();
-            }}>
-              <div className="form-control mt-6">
-                <button className="btn btn-primary" onClick={() => {signOut();signIn();}}>Sign in with Google Classroom</button>
-              </div>
-              <div className="form-control mt-6">
-                <button className="btn btn-primary">Elaborate</button>
-              </div>
-            </form>
-          </div>
-        </div>
+    <dialog id="my_modal_3" className="modal">
+      <div className="modal-box">
+        <form method="dialog">
+          {/* if there is a button in form, it will close the modal */}
+          <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+        <h3 className="font-bold text-lg">Actions:</h3>
+        <p className="py-4">Here are the actions that you can do using the Google Classroom integration.</p>
+        <Link href="/grading"><btn className="btn">Grade homework</btn></Link>
+        <Link href="/lessonplan"><btn className="btn">Generate lesson plan</btn></Link>
+        <Link href="/slideshow"><btn className="btn">Teach</btn></Link>
       </div>
+    </dialog>
+
+<div className="hero min-h-screen bg-base-200" >
+  <div className="hero-content text-center">
+    <div className="max-w-md">
+      <h1 className="text-5xl font-bold">AI Substitute Teacher</h1>
+      <p className="py-6">The hassle of teaching will be lessened by this Google Classroom integration.</p>
+      <button className="btn btn-outline"onClick={() => {signOut();signIn();}}>Sign in to Google Classroom</button>
+    </div>
+  </div>
+</div>
 
     </>
   );

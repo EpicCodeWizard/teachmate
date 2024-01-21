@@ -43,8 +43,8 @@ export default function MyApp() {
   // return <>
   //   <button onClick={() => {signOut();signIn();}}>d</button>
   // </>
-  const [plan, setPlan] = useState({__html: '<p className="py-4" id="out">Loading...</p>'});
 
+  const [plan, setPlan] = useState({__html: '<p className="py-4" id="out">Loading...</p>'});
 
   return (
     <>
@@ -54,54 +54,47 @@ export default function MyApp() {
           {/* if there is a button in form, it will close the modal */}
           <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
-        <h3 className="font-bold text-lg">Feedback:</h3>
+        <h3 className="font-bold text-lg">Curriculum:</h3>
         <div dangerouslySetInnerHTML={plan}></div>
       </div>
     </dialog>
       <div className="hero min-h-screen bg-base-200">
-        <div className="hero-content flex-col lg:flex-row-reverse">
+        <div className="hero-content flex-col lg:flex-row">
           <div className="text-center lg:text-left">
-            <h1 className="text-5xl font-bold">Expand on feedback</h1>
-            <p className="py-6">Once you provide a couple sentences of feedback, this app will elaborate on it and create more helpful feedback that is suited for the student.</p>
+            <h1 className="text-5xl font-bold">Find the curriculum and standards</h1>
+            <p className="py-6">Once you provide a couple sentences describing, this app will find the curriculum and standards that you need.</p>
           </div>
           <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
             <form className="card-body" onSubmit={(event) => {
               event.preventDefault();
             }}>
-              <label className="form-control w-full max-w-xs">
-                <div className="label">
-                  <span className="label-text">Pick your student's work</span>
-                  <span className="label-text-alt">.pdf</span>
-                </div>
-                <input type="file" id="fi" className="file-input file-input-bordered w-full max-w-xs" />
-                {/* <div className="label">
-                  <span className="label-text-alt">Alt label</span>
-                  <span className="label-text-alt">Alt label</span>
-                </div> */}
-              </label>
               <label className="form-control">
                 <div className="label">
-                  <span className="label-text">Upload your feedback</span>
-                  <span className="label-text-alt">(1-2) sentences recommended</span>
+                  <span className="label-text">Describe the curriculum</span>
+                  <span className="label-text-alt">(1-2) sentences minimum</span>
                 </div>
-                <textarea id="f"className="textarea textarea-bordered h-24" placeholder="Feedback"></textarea>
+                <textarea id="f"className="textarea textarea-bordered h-24" placeholder="Description"></textarea>
+              </label>
+              <label className="form-control w-full max-w-xs">
+                <div className="label">
+                  <span className="label-text">Duration</span>
+                  <span className="label-text-alt">Minutes</span>
+                </div>
+                <input type="text" id="f2" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
               </label>
               <div className="form-control mt-6">
                 <button id="fb"className="btn" onClick={
                   () => {
                     document.getElementById('my_modal_3').showModal();
 
-                    const formData = new FormData();
-                    formData.append('document', document.getElementById('fi').files[0]);
-                    setPlan({__html: fetch('/feedback?user_id=' + encodeURIComponent(user_id) + '&feedback=' + encodeURIComponent(feedback), {
-                      method: 'POST',
-                      body: formData
+                    setPlan({__html: fetch('/generate_curriculum?topic=' + encodeURIComponent(document.getElementById('f').textContent) + '&lesson_time=' + encodeURIComponent(document.getElementById('f2').textContent) + '&user_id=' + encodeURIComponent(user_id), {
+                      method: 'POST'
                   }).json()})
-                    
+                  
 
                     
                   }
-                }>Elaborate</button>
+                }>Find</button>
               </div>
             </form>
           </div>

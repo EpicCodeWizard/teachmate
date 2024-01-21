@@ -4,8 +4,78 @@
 
 
 
-// @ts-nocheck
-'use client';
+
+
+
+
+
+
+
+
+
+
+// const {google} = require('googleapis');
+// const classroom = google.classroom({version: 'v1', USER_OBJECT_FROM_CALLBACK});
+// async function listCourses() {
+//     const response = await classroom.courses.list({
+//         pageSize: 10 // Adjust pageSize as needed
+//     });
+//     const courses = response.data.courses;
+//     if (!courses || courses.length === 0) {
+//         console.log('No courses found.');
+//         return;
+//     }
+//     return courses;
+// }
+// async function listCourseWork(courseId) {
+//     const response = await classroom.courses.courseWork.list({
+//         courseId: courseId
+//     });
+//     const courseWorks = response.data.courseWork;
+//     if (!courseWorks || courseWorks.length === 0) {
+//         console.log(`No course works found for course ID: ${courseId}`);
+//         return;
+//     }
+//     return courseWorks;
+// }
+// async function listStudentSubmissions(courseId, courseWorkId) {
+//     const response = await classroom.courses.courseWork.studentSubmissions.list({
+//         courseId: courseId,
+//         courseWorkId: courseWorkId
+//     });
+//     const submissions = response.data.studentSubmissions;
+//     if (!submissions || submissions.length === 0) {
+//         console.log(`No student submissions found for course work ID: ${courseWorkId}`);
+//         return;
+//     }
+//     return submissions;
+// }
+// const courses = await listCourses();
+// if (courses && courses.length > 0) {
+//     const firstCourseId = courses[0].id;
+//     const assignments = await listCourseWork(firstCourseId);
+//     if (assignments && assignments.length > 0) {
+//         const firstAssignmentId = assignments[0].id;
+//         const submissions = await listStudentSubmissions(firstCourseId, firstAssignmentId);
+//         if (submissions) {
+//             submissions.forEach(submission => {
+//                 // SEND submission.attachments[0].link TO API ROUTE
+//             });
+//         }
+//     }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
 
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
@@ -43,6 +113,7 @@ export default function MyApp() {
   // return <>
   //   <button onClick={() => {signOut();signIn();}}>d</button>
   // </>
+
   const [plan, setPlan] = useState({__html: '<p className="py-4" id="out">Loading...</p>'});
 
 
@@ -59,10 +130,10 @@ export default function MyApp() {
       </div>
     </dialog>
       <div className="hero min-h-screen bg-base-200">
-        <div className="hero-content flex-col lg:flex-row-reverse">
+        <div className="hero-content flex-col lg:flex-row">
           <div className="text-center lg:text-left">
-            <h1 className="text-5xl font-bold">Expand on feedback</h1>
-            <p className="py-6">Once you provide a couple sentences of feedback, this app will elaborate on it and create more helpful feedback that is suited for the student.</p>
+            <h1 className="text-5xl font-bold">Grade homework</h1>
+            <p className="py-6">You can select assignments through Google Classroom and it will be graded by our knowledgable AI.</p>
           </div>
           <div className="card shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
             <form className="card-body" onSubmit={(event) => {
@@ -70,21 +141,14 @@ export default function MyApp() {
             }}>
               <label className="form-control w-full max-w-xs">
                 <div className="label">
-                  <span className="label-text">Pick your student's work</span>
+                  <span className="label-text">Pick your assignment</span>
                   <span className="label-text-alt">.pdf</span>
                 </div>
-                <input type="file" id="fi" className="file-input file-input-bordered w-full max-w-xs" />
+                <input id="fi" type="file" className="file-input file-input-bordered w-full max-w-xs" />
                 {/* <div className="label">
                   <span className="label-text-alt">Alt label</span>
                   <span className="label-text-alt">Alt label</span>
                 </div> */}
-              </label>
-              <label className="form-control">
-                <div className="label">
-                  <span className="label-text">Upload your feedback</span>
-                  <span className="label-text-alt">(1-2) sentences recommended</span>
-                </div>
-                <textarea id="f"className="textarea textarea-bordered h-24" placeholder="Feedback"></textarea>
               </label>
               <div className="form-control mt-6">
                 <button id="fb"className="btn" onClick={
@@ -93,15 +157,14 @@ export default function MyApp() {
 
                     const formData = new FormData();
                     formData.append('document', document.getElementById('fi').files[0]);
-                    setPlan({__html: fetch('/feedback?user_id=' + encodeURIComponent(user_id) + '&feedback=' + encodeURIComponent(feedback), {
+                    setPlan({__html: fetch('/grade?user_id=' + encodeURIComponent(user_id), {
                       method: 'POST',
                       body: formData
                   }).json()})
-                    
 
                     
                   }
-                }>Elaborate</button>
+                }>Grade</button>
               </div>
             </form>
           </div>
