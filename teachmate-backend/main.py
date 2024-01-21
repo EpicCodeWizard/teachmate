@@ -1,6 +1,7 @@
 from pytesseract import pytesseract
 from dotenv import dotenv_values
 from openai import OpenAI
+from mtcnn import MTCNN
 from PIL import Image
 from quart import *
 import cloudconvert
@@ -10,6 +11,7 @@ import base64
 import json
 import fitz
 import uuid
+import cv2
 import os
 import io
 
@@ -19,6 +21,7 @@ cloudconvert_config = dotenv_values(".cloudconvert.env")
 openai_config = dotenv_values(".openai.env")
 
 cloudconvert.configure(api_key=cloudconvert_config["api-key"])
+detector = MTCNN()
 pytesseract.tesseract_cmd = "C:\\Users\\sarve\\Downloads\\tesseract.exe"
 openai_api_key = openai_config["api-key"]
 openai_client = OpenAI(api_key=openai_config["api-key"])
@@ -77,24 +80,59 @@ async def substitute():
     for file in (await request.files).values(): # rest of the files, past the slideshow, will be google classroom documents
         upload_file_to_corpus(request.args["user_id"], file)
 
-    final_audio_files = []
+    final_slideshow_files = {}
     for page_text, page_image in zip(document_text, document_images):
         relevant_page_text = query_corpus(request.args["user_id"], page_text)
         image_buffer = io.BytesIO()
         page_image.save(image_buffer, format="JPEG")
         image_buffer.seek(0)
+        page_image_url = f"data:image/jpeg;base64,{base64.b64encode(image_buffer.read()).decode()}"
 
         relevant_page_text_combined = "\n".join(relevant_page_text)
         prompt = f"Page Text:\n{page_text}\nRelevant Assignment Documents (from google classroom):\n{relevant_page_text_combined}"
         system_message = "You are a slideshow speaker text creator. Based on the following slide text and slide image, generate a spoken lesson plan. Whatever you generate will be directly spoke to students. You will be given the slide page text, slide page image, and relevant other assigned documents from google classroom."
-        response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4-vision-preview", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64.b64encode(image_buffer.read()).decode()}"}}]}], "max_tokens": 1500})
+        response = requests.post("https://api.openai.com/v1/chat/completions", headers={"Content-Type": "application/json", "Authorization": f"Bearer {openai_api_key}"}, json={"model": "gpt-4-vision-preview", "messages": [{"role": "system", "content": [{"type": "text", "text": system_message}]}, {"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image_url", "image_url": {"url": page_image_url}}]}], "max_tokens": 1500})
 
         audio = openai_client.audio.speech.create(model="tts-1", voice="echo", input=response.json().choices[0]).content
         audio_filename = str(uuid.uuid4()) + ".mp3"
         audio_files[audio_filename] = io.BytesIO(audio)
-        final_audio_files.append("/downloads/" + audio_filename)
+        final_slideshow_files[page_image_url] = "/downloads/" + audio_filename
 
-    return jsonify(final_audio_files)
+    return jsonify(final_slideshow_files)
+
+@app.route("/attendance")
+async def attendance():
+    seating_chart = fitz.open((await request.files)["attendance"].filename, (await request.files)["attendance"].read())
+    text_bbox_dict = {}
+    for page in seating_chart:
+        text_dict = page.get_text("dict")
+        for block in text_dict["blocks"]:
+            for line in block["lines"]:
+                for span in line["spans"]:
+                    text_bbox_dict[span["text"].strip()] = list(span["bbox"])
+
+    new_bboxes = []
+    rgb_attendance_photo = cv2.cvtColor(cv2.imread((await request.files)["attendance"]), cv2.COLOR_BGR2RGB)
+    for face in detector.detect_faces(rgb_attendance_photo):
+        bbox = face["box"]
+        bbox[2] += bbox[0]
+        bbox[3] += bbox[1]
+        new_bboxes.append(bbox)
+
+    closest_texts = {}
+    for new_bbox in new_bboxes:
+        closest_text = None
+        min_distance = float("inf")
+        for text, bbox in text_bbox_dict.items():
+            center1 = ((new_bbox[0] + new_bbox[2]) / 2, (new_bbox[1] + new_bbox[3]) / 2)
+            center2 = ((bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2)
+            distance = ((center1[0] - center2[0]) ** 2 + (center1[1] - center2[1]) ** 2) ** 0.5
+            if distance < min_distance:
+                min_distance = distance
+                closest_text = text
+        closest_texts[closest_text] = new_bbox
+
+    return jsonify({"present": list(closest_texts.keys()), "absent": list(set(text_bbox_dict.keys()) - set(closest_texts.keys()))})
 
 @app.route("/download/<filename>")
 def download_file(filename):
